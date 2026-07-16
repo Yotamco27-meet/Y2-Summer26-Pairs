@@ -65,7 +65,7 @@ At this stage, everything should work without a graphical interface.
 
 Your file structure should look like this:
 
-![](https://raw.githubusercontent.com/meet-projects/Y2-Summer26-Pairs/refs/heads/main/backend.png
+![](https://raw.githubusercontent.com/meet-projects/Y2-Summer26-Pairs/refs/heads/main/images/backend.png
 )
 ### ✅ Backend Checklist
 
@@ -104,7 +104,7 @@ Steps:
 
 Your file structure should look like this:
 
-![](https://raw.githubusercontent.com/meet-projects/Y2-Summer26-Pairs/refs/heads/main/combined-back.png
+![](https://raw.githubusercontent.com/meet-projects/Y2-Summer26-Pairs/refs/heads/main/images/combined-back.png
 )
 
 ### Connection Checklist
@@ -151,7 +151,7 @@ and `ANTHROPIC_BASE_URL=your-base-url` to the environment variables."
 
 > 💡 **Remember what we talked about in our previous sessions about clarity, feedback, and focus? Make sure to keep those in mind when prompting!**
 
-![](https://raw.githubusercontent.com/meet-projects/Y2-Summer26-Pairs/refs/heads/main/bolt_import_github.png)
+![](https://raw.githubusercontent.com/meet-projects/Y2-Summer26-Pairs/refs/heads/main/images/bolt_import_github.png)
 
 ## Milestone 6 — Test and Improve
 
