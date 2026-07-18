@@ -11,29 +11,22 @@ def run_chat():
     print('You: (type exit to quit)')
     input_msg = input('what is your goal for today? ')
     system_message = f"""
-        You are Dominic Decoco, a hilarious sports analyst and all-sports coach who is incredibly skilled at analyzing performance.
+        You are  johnny an adventurous, deeply knowledgeable local guide and experience curator. Your job is to build highly detailed, engaginglists of things to do in the destination the user is flying to.
 
-        Your job is to answer user questions about sports using detailed sports analysis and sports analogies, keeping your responses highly detailed but concise (approximately 1 to 12 lines).
-        goal:
+        Your goal is to curate activities based on the user's destination:
         - {input_msg}
 
         Rules:
-        - Always answer in a very funny, high-energy way.
-        - Always use sports analogies to explain your points.
-        - Never write a single sentence without including something connected to sports.
+        - Use web search to look up current events, seasonal highlights, local weather, and top-rated attractions for the specified destination. Formulate search queries like "[Destination] travel guide hidden gems" or "[Destination] events in [Month/Year]".
+        - Keep your tone vibrant, inspiring, and rich with local flavor. Keep your response detailed but organized (approx. 10 to 18 lines).
+        - Avoid generic recommendations , instead of just saying "visit Paris," recommend "watching the sunset from the steps of Sacré-Coeur in Montmartre".
 
         Response format:
-        - end with a rating of 1-5 based on how well you think the user answered the question. in the end of the last sentence. Include the scoring rubric in the system prompt.
-            - the scoring rubric is as follows:
-                - 5: Excellent answer, very detailed and insightful. - the users answer has to be very detailed, insightful and relevant.
-                - 4: Good answer, but could use more detail or examples. - the users answer has to be very to the question relevant.
-                - 3: Average answer, some detail but lacking depth. - the users answer has to be relevant but lacking detail and insight.
-                - 2: Poor answer, lacking detail and insight. - the users answer has to be slightly relevant but lacking detail and insight.
-                - 1: Very poor answer, no detail or insight. - the users answer has to be irrelevant and lacking detail and insight.
-        -  a one-sentence summary of what the user said.
-        - Then give your response.
-        - End with one cool question.
-        - the very last thing should be a sentence about why you gave the rating and then only be the rating, nothing else. no other characters, just the rating. example: 5/5
+        - A one-sentence enthusiastic summary of the vibe of the destination the user is visiting.
+        - Top Attractions (The Must-Sees): 2 highly rated, iconic spots with brief descriptions of why they are worth it.
+        - Hidden Gems (The Local Secrets): 2 off-the-beaten-path locations or experiences that regular tourists miss.
+        - Food & Culture Spotlights:1-2 highly rated local dishes or specific street markets/cafes to try.
+        - End with one tailored question asking about their personal interests  (outdoor adventure, history, art, or nightlife) to customize their itinerary further.
         """
     history = []
     score = []
@@ -52,17 +45,20 @@ def run_chat():
             if user_input.lower() == '/summary':
                 summary = history[-1]['content'] if history else "No conversation history."
                 user_input = f"Summarize the conversation so far: {summary}"
+
             response = client.messages.create(
-                model="claude-haiku-4-5-20251001",
-                max_tokens=300,
-                temperature=0.7,
-                system=system_message,
-                messages=history
+            model="claude-haiku-4-5-20251001",
+            max_tokens=1000,
+            temperature=0.7,
+            system=system_message,
+            messages=history,
+            tools=[{"type": "web_search_20250305"}] 
             )
+
             print(f"tokens used in input: {response.usage.input_tokens}, tokens used in output: {response.usage.output_tokens} in total: {response.usage.input_tokens + response.usage.output_tokens}")
             count_tokens += response.usage.input_tokens + response.usage.output_tokens
             print(f"Total tokens used: {count_tokens}")
-            total_tokens_cost += response.usage.input_tokens // 1000000 * 0.25 + response.usage.output_tokens // 1000000 * 1.25
+            total_tokens_cost += response.usage.input_tokens / 1000000 * 0.25 + response.usage.output_tokens // 1000000 * 1.25
             print(f"Total tokens cost: {total_tokens_cost}$")
             reply = response.content[0].text
             #print(response)
@@ -74,13 +70,6 @@ def run_chat():
             if score_match:
                 extracted_score = int(score_match.group(1))
                 score.append(extracted_score)
-                print(f" Recorded Score: {extracted_score}/5")
-            print("""- the scoring rubric is as follows:
-                    - 5: Excellent answer, very detailed and insightful. - the users answer has to be very detailed, insightful and relevant.
-                    - 4: Good answer, but could use more detail or examples. - the users answer has to be very to the question relevant.
-                    - 3: Average answer, some detail but lacking depth. - the users answer has to be relevant but lacking detail and insight.
-                    - 2: Poor answer, lacking detail and insight. - the users answer has to be slightly relevant but lacking detail and insight.
-                    - 1: Very poor answer, no detail or insight. - the users answer has to be irrelevant and lacking detail and insight.""")
             history.append({'role': 'assistant', 'content': reply})
             if user_input.lower() == 'reset':
                 history = []
