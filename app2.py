@@ -44,11 +44,10 @@ def run_chat():
             max_tokens=300,
             temperature=0.7,
             system=system_message,
-            messages=history
+            messages=history,
+            tools=[{"type": "web_search_20250305"}] 
         )
         print(response)
         reply = response.content[0].text
         print(f'Claude: {reply}')
-        history.append({'role': 'assistant', 'content': reply})
-
-run_chat()
+        run_chat
