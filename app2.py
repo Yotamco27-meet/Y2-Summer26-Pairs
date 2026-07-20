@@ -14,7 +14,7 @@ def save_booking(details: str):
 def run_chat():
     print('WELCOME TO THE BEST FLIGHT AGENT.')
     
-    # YOUR EXACT SYSTEM MESSAGE UNCHANGED
+    
     system_message = """You are a flight agent. 
     Basically you recommend to people easy direct flights, or flights with the fewest stops possible.
     Provide the best time to departure and arrive, and the cheapest flights.
@@ -34,7 +34,7 @@ def run_chat():
       - A bulleted Highly-Rated Hotel Options section with 2 hotels including price per night, booking platform rating, and one key perk like Free Wi-Fi or Near Subway.
     [Next Step]: One strategic question regarding their budget, preferred airlines, or dates to help refine the search."""
 
-    # Simple tool configuration config
+    
     tools_config = [{
         "name": "save_booking",
         "description": "Saves a confirmed flight or hotel booking text block.",
