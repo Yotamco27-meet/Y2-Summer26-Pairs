@@ -14,27 +14,8 @@ def save_booking(details: str):
 def run_chat():
     print('WELCOME TO THE BEST FLIGHT AGENT.')
     
-    
-    system_message = """You are a flight agent. 
-    Basically you recommend to people easy direct flights, or flights with the fewest stops possible.
-    Provide the best time to departure and arrive, and the cheapest flights.
-    Also recommend the best hotels (4-5 star hotels or apartments) based on how many guests there are, the purpose of the visit, and their budget.
-    All of this must be based on the user's input message.
-    
-    RULES YOU SHOULDN'T BREAK:
-    1. Structure a precise web search query before you answer to find current real-time prices, airlines, and hotel ratings. Formulate your search query looking for: "cheap flights from [Origin] to [Destination] [Month/Year] and top rated budget hotels in [Destination] 4 star".
-    2. Be professional, highly encouraging, and detail-oriented. Keep responses organized and concise (approx. 5 to 15 lines).
-    3. Never recommend a hotel with less than a 4/5 or 8/10 rating unless the client specifically asked for it.
-    4. Always include estimated pricing and airline/hotel names.
-    
-    RESPONSE FORMAT:
-    [Summary]: A single-sentence structured point acknowledging the user's destination and travel dates.
-    [Response]: The main answer, including:
-      - A bulleted Flight Options section with 2 competitive options (including airline, estimated cost, and layover status).
-      - A bulleted Highly-Rated Hotel Options section with 2 hotels including price per night, booking platform rating, and one key perk like Free Wi-Fi or Near Subway.
-    [Next Step]: One strategic question regarding their budget, preferred airlines, or dates to help refine the search."""
+    system_message = """You are a flight agent...""" # Keep your system prompt here
 
-    
     tools_config = [{
         "name": "save_booking",
         "description": "Saves a confirmed flight or hotel booking text block.",
@@ -51,7 +32,6 @@ def run_chat():
         user_input = input('\n>>> ')
 
         if user_input.lower() == 'exit':
-            
             break
         
         history.append({'role': 'user', 'content': user_input})
@@ -66,27 +46,48 @@ def run_chat():
                 tools=tools_config
             )
 
-            
-            if response.stop_reason == "tool_use":
+            # Keep looping while Claude wants to use tools
+            while response.stop_reason == "tool_use":
+                # 1. Append the assistant message containing tool_use blocks to history
                 history.append({'role': 'assistant', 'content': response.content})
-                tool_block = next(b for b in response.content if b.type == "tool_use")
                 
-                result = save_booking(details=tool_block.input.get("details"))
+                tool_results = []
 
+                # 2. Process all tool calls in the response
+                for block in response.content:
+                    if block.type == "tool_use":
+                        if block.name == "save_booking":
+                            result = save_booking(details=block.input.get("details"))
+                        else:
+                            result = "Error: Unknown tool."
+
+                        tool_results.append({
+                            "type": "tool_result",
+                            "tool_use_id": block.id,
+                            "content": result
+                        })
+
+                # 3. Append the tool results as a single user message into history
+                history.append({'role': 'user', 'content': tool_results})
+
+                # 4. Request the next turn from Claude with updated history
                 response = client.messages.create(
                     model='claude-3-5-haiku-latest',
                     max_tokens=600,
                     system=system_message,
-                    messages=[*history, {"role": "user", "content": [{"type": "tool_result", "tool_use_id": tool_block.id, "content": result}]}]
+                    messages=history,
+                    tools=tools_config
                 )
-            
-           
+
+            # Extract final text answer
             reply = "".join([block.text for block in response.content if block.type == 'text'])
             print(f'\nClaude:\n{reply}')
-            history.append({'role': 'assistant', 'content': reply})
+            
+            # Save final assistant response into history
+            history.append({'role': 'assistant', 'content': response.content})
             
         except Exception as e:
             print(f"\nAn error occurred: {e}")
-# new one
+
 if __name__ == "__main__":
     run_chat()
