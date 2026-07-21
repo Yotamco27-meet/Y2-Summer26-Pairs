@@ -25,13 +25,13 @@ TOOLS_CONFIG = [{
 }]
 
 
-def run_chat(system_prompt: str, history: list, max_tokens: int = 600) -> str:
+def connect_run_chat(system_prompt: str, history: list, max_tokens: int = 600) -> str:
     """Helper function to execute an agent call and handle tool execution loops."""
     # Create a shallow copy of history so agents don't mutate external lists unintentionally
     turn_history = list(history)
 
     response = client.messages.create(
-        model='claude-3-5-haiku-latest',
+        model='claude-4-5-haiku-latest',
         max_tokens=max_tokens,
         temperature=0.7,
         system=system_prompt,
@@ -56,7 +56,7 @@ def run_chat(system_prompt: str, history: list, max_tokens: int = 600) -> str:
         turn_history.append({'role': 'user', 'content': tool_results})
 
         response = client.messages.create(
-            model='claude-3-5-haiku-latest',
+            model='claude-4-5-haiku-latest',
             max_tokens=max_tokens,
             system=system_prompt,
             messages=turn_history,
@@ -114,7 +114,7 @@ def run_chat():
             - Selected Primary Hotel & Neighborhood
             """
 
-            latest_logistics = run_chat(agent2_system, conversation_history, max_tokens=600)
+            latest_logistics = connect_run_chat(agent2_system, conversation_history, max_tokens=600)
 
             print("\n[Agent 1: Local Guide Johnny Planning Activities...]")
 
@@ -135,7 +135,7 @@ def run_chat():
             """
 
             # Feed conversation history to Johnny so he understands follow-up questions
-            johnny_response = run_chat(agent1_system, conversation_history, max_tokens=700)
+            johnny_response = connect_run_chat(agent1_system, conversation_history, max_tokens=700)
 
             # STEP 3: Display combined response and update global history
 
