@@ -38,7 +38,7 @@ def run_chat():
      
         try:
             response = client.messages.create(
-                model='claude-3-5-haiku-latest', 
+                model='claude-4-5-haiku-latest', 
                 max_tokens=600,                  
                 temperature=0.7,
                 system=system_message,
@@ -72,7 +72,7 @@ def run_chat():
 
                 # 4. Request the next turn from Claude with updated history
                 response = client.messages.create(
-                    model='claude-3-5-haiku-latest',
+                    model='claude-4-5-haiku-latest',
                     max_tokens=600,
                     system=system_message,
                     messages=history,

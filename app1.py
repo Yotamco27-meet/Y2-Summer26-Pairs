@@ -15,15 +15,12 @@ def save_booking(details: str):
 
 
 def run_chat():  
-    print('You: (type exit to quit)')  
-    input_msg = input('what is your goal for today? ')  
+    print('You: (type exit to quit)')   
     system_message = f"""  
     You are johnny an adventurous, deeply knowledgeable local  
     guide and experience curator. Your job is to build highly detailed,  
     engaging lists of things to do in the destination the user is flying to.  
 
-    Your goal is to curate activities based on the user's destination:  
-    - {input_msg}  
 
     Rules:  
     - Use web search to look up current events, seasonal highlights, local weather, and top-rated attractions for the specified destination.
@@ -85,7 +82,7 @@ def run_chat():
 
         try:
             response = client.messages.create(  
-                model="claude-3-5-haiku-latest",  
+                model="claude-4-5-haiku-latest",  
                 max_tokens=600,  
                 temperature=0.7,  
                 system=system_message,  
@@ -119,7 +116,7 @@ def run_chat():
 
                 # Call API again with updated tool results
                 response = client.messages.create(
-                    model="claude-3-5-haiku-latest",
+                    model="claude-4-5-haiku-latest",
                     max_tokens=600,
                     system=system_message,
                     messages=history,
@@ -143,10 +140,10 @@ def run_chat():
             history.append({'role': 'assistant', 'content': response.content})  
 
             # Print token stats
-            print(f"\n[Tokens used in turn: {response.usage.input_tokens + response.usage.output_tokens} | Total Tokens: {count_tokens} | Total Cost: ${total_tokens_cost:.6f}]")
+            print(f"[Tokens used in turn: {response.usage.input_tokens + response.usage.output_tokens} | Total Tokens: {count_tokens} | Total Cost: ${total_tokens_cost:.6f}]")
 
         except Exception as e:
-            print(f"\nAn error occurred: {e}")
+            print(f"An error occurred: {e}")
 
 if __name__ == "__main__":
     run_chat()
