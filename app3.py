@@ -2,9 +2,32 @@ import os
 import re
 from anthropic import Anthropic
 from dotenv import load_dotenv
+from fpdf import FPDF
 
 load_dotenv()
 client = Anthropic(api_key=os.getenv('ANTHROPIC_API_KEY'))
+
+
+def save_booking_pdf(content: str) -> str:
+    """Creates a PDF file with title and booking details all in one text string."""
+    pdf = FPDF()
+    pdf.add_page()
+
+    # Title
+    pdf.set_font("Helvetica", style="B", size=16)
+    pdf.cell(0, 10, "Travel Booking Confirmation", new_x="LMARGIN", new_y="NEXT")
+    pdf.ln(5)
+
+    # Main Content
+    pdf.set_font("Helvetica", size=12)
+    pdf.multi_cell(0, 8, content)
+
+    output_filename = "booking_confirmation.pdf"
+    pdf.output(output_filename)
+    return f"Success: Booking saved to {output_filename}"
+
+
+
 
 
 # Shared Booking Tool
