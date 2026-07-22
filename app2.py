@@ -1,20 +1,63 @@
 import os
 from anthropic import Anthropic
 from dotenv import load_dotenv
+from fpdf import FPDF
 
 load_dotenv()
 client = Anthropic(api_key=os.getenv('ANTHROPIC_API_KEY'))
 
 
+def save_booking_pdf(content: str):
+    pdf = FPDF()
+    pdf.add_page()
+
+    pdf.set_font("Helvetica", "B", 16)
+    pdf.cell(0, 10, "Travel Booking Confirmation", ln=True)
+
+    pdf.ln(5)
+
+    pdf.set_font("Helvetica", "", 12)
+
+    content = content.encode("latin-1", "replace").decode("latin-1")
+
+    pdf.multi_cell(0, 8, content)
+
+    pdf.output("booking_confirmation.pdf")
+
+    return "PDF created successfully."
+
+
 def save_booking(details: str):
+    # Save booking to text file
     with open("bookings.txt", "a") as f:
         f.write(f"{details}\n---\n")
-    return "Success: Booking saved locally."
+
+    # Create PDF confirmation
+    save_booking_pdf(details)
+
+    return "Success: Booking saved locally and PDF created."
 
 def run_chat():
     print('WELCOME TO THE BEST FLIGHT AGENT.')
     
-    system_message = """You are a flight agent...""" # Keep your system prompt here
+    system_message = """You are a flight agent.
+   Basically you recommend to people easy direct flights, or flights with the fewest stops possible.
+   Provide the best time to departure and arrive, and the cheapest flights.
+   Also recommend the best hotels (4-5 star hotels or apartments) based on how many guests there are, the purpose of the visit, and their budget.
+   All of this must be based on the user's input message.
+  
+   RULES YOU SHOULDN'T BREAK:
+   1. Structure a precise web search query before you answer to find current real-time prices, airlines, and hotel ratings. Formulate your search query looking for: "cheap flights from [Origin] to [Destination] [Month/Year] and top rated budget hotels in [Destination] 4 star".
+   2. Be professional, highly encouraging, and detail-oriented. Keep responses organized and concise (approx. 5 to 15 lines).
+   3. Never recommend a hotel with less than a 4/5 or 8/10 rating unless the client specifically asked for it.
+   4. Always include estimated pricing and airline/hotel names.
+   if the user use book it , reserve it , i will take this deal , etc immediatly call save_booking tool.
+  
+   RESPONSE FORMAT:
+   [Summary]: A single-sentence structured point acknowledging the user's destination and travel dates.
+   [Response]: The main answer, including:
+     - A bulleted Flight Options section with 2 competitive options (including airline, estimated cost, and layover status).
+""" 
 
     tools_config = [{
         "name": "save_booking",
@@ -46,14 +89,14 @@ def run_chat():
                 tools=tools_config
             )
 
-            # Keep looping while Claude wants to use tools
+            
             while response.stop_reason == "tool_use":
-                # 1. Append the assistant message containing tool_use blocks to history
+                
                 history.append({'role': 'assistant', 'content': response.content})
                 
                 tool_results = []
 
-                # 2. Process all tool calls in the response
+                
                 for block in response.content:
                     if block.type == "tool_use":
                         if block.name == "save_booking":
@@ -67,10 +110,10 @@ def run_chat():
                             "content": result
                         })
 
-                # 3. Append the tool results as a single user message into history
+                
                 history.append({'role': 'user', 'content': tool_results})
 
-                # 4. Request the next turn from Claude with updated history
+                
                 response = client.messages.create(
                     model='claude-4-5-haiku-latest',
                     max_tokens=600,
@@ -79,11 +122,11 @@ def run_chat():
                     tools=tools_config
                 )
 
-            # Extract final text answer
+            
             reply = "".join([block.text for block in response.content if block.type == 'text'])
             print(f'\nClaude:\n{reply}')
             
-            # Save final assistant response into history
+            
             history.append({'role': 'assistant', 'content': response.content})
             
         except Exception as e:
@@ -91,4 +134,4 @@ def run_chat():
 
 if __name__ == "__main__":
     run_chat()
-    #type shi
+    
